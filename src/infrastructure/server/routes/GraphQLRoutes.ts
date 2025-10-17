@@ -6,6 +6,7 @@ import Container from "typedi";
 import { GetUserResolver } from "../../resolvers/users/GetUserResolver";
 import { GetUserListResolver } from "../../resolvers/users/GetUserListResolver";
 import { GetBetResolver } from "../../resolvers/bets/GetBetResolver";
+import { GetBetListResolver } from "../../resolvers/bets/GetBetListResolver";
 
 export class GraphQLRoutes {
   private mainpath = "/graphql";
@@ -13,7 +14,12 @@ export class GraphQLRoutes {
   public async execute(app: Application): Promise<void> {
     const schema = await buildSchema({
       container: Container,
-      resolvers: [GetUserResolver, GetUserListResolver, GetBetResolver],
+      resolvers: [
+        GetUserResolver,
+        GetUserListResolver,
+        GetBetResolver,
+        GetBetListResolver,
+      ],
       validate: false,
     });
 
