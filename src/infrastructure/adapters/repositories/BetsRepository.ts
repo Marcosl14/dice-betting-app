@@ -1,6 +1,7 @@
 import { Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
 import { IBetsRepository } from "../../../domain/repositories/IBetsRepository";
+import { CreateBetDTO } from "../../../application/dtos/CreateBetDTO";
 
 @Service()
 export class BetsRepository implements IBetsRepository {
@@ -57,5 +58,10 @@ export class BetsRepository implements IBetsRepository {
         win: false,
       },
     ];
+  }
+
+  async create(data: CreateBetDTO): Promise<IBet> {
+    const newBet: IBet = { id: 10, ...data };
+    return newBet;
   }
 }

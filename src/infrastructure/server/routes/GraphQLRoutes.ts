@@ -1,13 +1,15 @@
-import { Application } from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
+import { Application } from "express";
 import { buildSchema } from "type-graphql";
 import Container from "typedi";
-import { GetUserResolver } from "../../resolvers/users/GetUserResolver";
-import { GetUserListResolver } from "../../resolvers/users/GetUserListResolver";
-import { GetBetResolver } from "../../resolvers/bets/GetBetResolver";
-import { GetBetListResolver } from "../../resolvers/bets/GetBetListResolver";
+
+import { CreateBetResolver } from "../../resolvers/bets/CreateBetResolver";
 import { GetBestBetPerUserResolver } from "../../resolvers/bets/GetBestBetPerUserResolver";
+import { GetBetListResolver } from "../../resolvers/bets/GetBetListResolver";
+import { GetBetResolver } from "../../resolvers/bets/GetBetResolver";
+import { GetUserListResolver } from "../../resolvers/users/GetUserListResolver";
+import { GetUserResolver } from "../../resolvers/users/GetUserResolver";
 
 export class GraphQLRoutes {
   private mainpath = "/graphql";
@@ -18,9 +20,11 @@ export class GraphQLRoutes {
       resolvers: [
         GetUserResolver,
         GetUserListResolver,
+
         GetBetResolver,
         GetBetListResolver,
         GetBestBetPerUserResolver,
+        CreateBetResolver,
       ],
       validate: false,
     });
