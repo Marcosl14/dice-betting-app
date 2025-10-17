@@ -11,4 +11,19 @@ export class UsersRepository implements IUsersRepository {
       balance: 100.1,
     };
   }
+
+  async findAll(): Promise<IUser[]> {
+    return [
+      {
+        id: 1,
+        name: "John Doe",
+        balance: 100.1,
+      },
+      {
+        id: 2,
+        name: "Jane Doe",
+        balance: 200.2,
+      },
+    ];
+  }
 }
