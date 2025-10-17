@@ -10,7 +10,7 @@ export class GetUserResolver {
   constructor(private readonly getUserUseCase: GetUserUseCase) {}
 
   @Query(() => User)
-  async user(
+  async getUser(
     @Arg("id", () => ID, { nullable: false }) id: number
   ): Promise<IUser> {
     return await this.getUserUseCase.execute(id);
