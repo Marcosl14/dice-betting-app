@@ -11,6 +11,6 @@ export class GetUserListUseCase {
   ) {}
 
   public async execute(): Promise<IUser[]> {
-    return this.usersRepository.findAll();
+    return await this.usersRepository.findAll();
   }
 }

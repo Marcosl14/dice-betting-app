@@ -1,6 +1,6 @@
 import { IUser } from "../entities/IUser";
 
 export interface IUsersRepository {
-  find(id: number): Promise<IUser>;
+  find(id: number): Promise<IUser | undefined>;
   findAll(): Promise<IUser[]>;
 }

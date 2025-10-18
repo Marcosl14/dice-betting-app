@@ -6,6 +6,8 @@ import { GetBetUseCase } from "../../../application/usecases/bets/GetBetUseCase"
 import { User } from "../../../application/models/User";
 import { GetUserUseCase } from "../../../application/usecases/users/GetUserUseCase";
 import { IUser } from "../../../domain/entities/IUser";
+import { GraphQlErrorHandling } from "../errors/GraphQlErrorHandling";
+import { BetModel } from "../../database/sequelize-postgres/models/BetModel";
 
 @Service()
 @Resolver(() => Bet)
@@ -19,11 +21,21 @@ export class GetBetResolver {
   async getBet(
     @Arg("id", () => ID, { nullable: false }) id: number
   ): Promise<IBet> {
-    return await this.getBetUseCase.execute(id);
+    try {
+      return await this.getBetUseCase.execute(id);
+    } catch (error) {
+      GraphQlErrorHandling.handle(error as Error);
+      throw error;
+    }
   }
 
   @FieldResolver(() => User, { name: "user" })
-  async user(@Root() bet: Bet): Promise<IUser> {
-    return this.getUserUseCase.execute(bet.userId);
+  async user(@Root() bet: BetModel): Promise<IUser> {
+    try {
+      return await this.getUserUseCase.execute(bet.userId);
+    } catch (error) {
+      GraphQlErrorHandling.handle(error as Error);
+      throw error;
+    }
   }
 }

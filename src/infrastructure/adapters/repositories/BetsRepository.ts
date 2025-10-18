@@ -1,67 +1,81 @@
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
 import { IBetsRepository } from "../../../domain/repositories/IBetsRepository";
+import { BetModel } from "../../database/sequelize-postgres/models/BetModel";
+import { UserModel } from "../../database/sequelize-postgres/models/UserModel";
 import { CreateBetDTO } from "../../../application/dtos/CreateBetDTO";
+import { QueryTypes } from "sequelize";
+import { BadRequestError } from "../../../application/erros/BadRequestError";
 
 @Service()
 export class BetsRepository implements IBetsRepository {
-  async find(id: number): Promise<IBet> {
-    return {
-      id,
-      userId: 1,
-      betAmount: 100,
-      chance: 0.5,
-      payout: 50,
-      win: true,
-    };
+  constructor(
+    @Inject("betModel") private betModel: typeof BetModel,
+    @Inject("userModel") private userModel: typeof UserModel
+  ) {}
+
+  async find(id: number): Promise<IBet | undefined> {
+    const bet = await this.betModel.findByPk(id);
+    return bet?.dataValues;
   }
 
   async findAll(): Promise<IBet[]> {
-    return [
-      {
-        id: 1,
-        userId: 1,
-        betAmount: 100,
-        chance: 0.5,
-        payout: 50,
-        win: true,
-      },
-      {
-        id: 2,
-        userId: 1,
-        betAmount: 200,
-        chance: 0.4,
-        payout: 40,
-        win: false,
-      },
-    ];
+    const bets = await this.betModel.findAll();
+    return bets.map((bet) => bet.dataValues);
   }
 
   async findBestBetPerUser(limit: number): Promise<IBet[]> {
-    console.log(limit);
+    const query = `
+      SELECT DISTINCT ON ("userId") *
+      FROM bets
+      WHERE win = true
+      ORDER BY "userId", (payout / "betAmount") DESC, id DESC
+      LIMIT :limit
+    `;
 
-    return [
-      {
-        id: 1,
-        userId: 1,
-        betAmount: 100,
-        chance: 0.5,
-        payout: 50,
-        win: true,
-      },
-      {
-        id: 2,
-        userId: 1,
-        betAmount: 200,
-        chance: 0.4,
-        payout: 40,
-        win: false,
-      },
-    ];
+    const bestBets = await this.betModel.sequelize!.query<IBet>(query, {
+      replacements: { limit },
+      type: QueryTypes.SELECT,
+    });
+
+    return bestBets;
   }
 
   async create(data: CreateBetDTO): Promise<IBet> {
-    const newBet: IBet = { id: 10, ...data };
-    return newBet;
+    const result = await this.betModel.sequelize!.transaction(async (t) => {
+      const user = await this.userModel.findByPk(data.userId, {
+        transaction: t,
+        lock: true,
+      });
+
+      if (!user) {
+        throw new BadRequestError(
+          `User with id ${data.userId} does not exist.`
+        );
+      }
+
+      if (user.balance < data.betAmount) {
+        throw new BadRequestError("Insufficient balance.");
+      }
+
+      const bet = await this.betModel.create(
+        {
+          ...data,
+        },
+        { transaction: t }
+      );
+
+      user.balance -= data.betAmount;
+
+      if (data.win) {
+        user.balance += data.payout;
+      }
+
+      await user.save({ transaction: t });
+
+      return bet;
+    });
+
+    return result.dataValues;
   }
 }

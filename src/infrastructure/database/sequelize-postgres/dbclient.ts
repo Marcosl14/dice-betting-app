@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize-typescript";
 import { IDatabaseConnection } from "../../../domain/database/IDatabaseConnection";
 import { UserModel } from "./models/UserModel";
 import { BetModel } from "./models/BetModel";
+import Container from "typedi";
 
 export class DbClient implements IDatabaseConnection {
   private database = process.env.DB_NAME!;
@@ -26,6 +27,9 @@ export class DbClient implements IDatabaseConnection {
     try {
       await this.instance.authenticate();
       console.log("Connection has been established successfully.");
+
+      Container.set("userModel", UserModel);
+      Container.set("betModel", BetModel);
     } catch (error) {
       console.error("Unable to connect to the database:", error);
       throw error;

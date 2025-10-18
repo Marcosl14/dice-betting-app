@@ -11,6 +11,6 @@ export class GetBestBetPerUserUseCase {
   ) {}
 
   public async execute(limit: number): Promise<IBet[]> {
-    return this.betsRepository.findBestBetPerUser(limit);
+    return await this.betsRepository.findBestBetPerUser(limit);
   }
 }

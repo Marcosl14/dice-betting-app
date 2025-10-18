@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { User } from "../../../application/models/User";
 import { IUser } from "../../../domain/entities/IUser";
 import { GetUserUseCase } from "../../../application/usecases/users/GetUserUseCase";
+import { GraphQlErrorHandling } from "../errors/GraphQlErrorHandling";
 
 @Service()
 @Resolver(() => User)
@@ -13,6 +14,11 @@ export class GetUserResolver {
   async getUser(
     @Arg("id", () => ID, { nullable: false }) id: number
   ): Promise<IUser> {
-    return await this.getUserUseCase.execute(id);
+    try {
+      return await this.getUserUseCase.execute(id);
+    } catch (error) {
+      GraphQlErrorHandling.handle(error as Error);
+      throw error;
+    }
   }
 }

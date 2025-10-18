@@ -1,29 +1,19 @@
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { IUser } from "../../../domain/entities/IUser";
 import { IUsersRepository } from "../../../domain/repositories/IUsersRepository";
+import { UserModel } from "../../database/sequelize-postgres/models/UserModel";
 
 @Service()
 export class UsersRepository implements IUsersRepository {
-  async find(id: number): Promise<IUser> {
-    return {
-      id,
-      name: "John Doe",
-      balance: 100.1,
-    };
+  constructor(@Inject("userModel") private userModel: typeof UserModel) {}
+
+  async find(id: number): Promise<IUser | undefined> {
+    const user = await this.userModel.findByPk(id);
+    return user?.dataValues;
   }
 
   async findAll(): Promise<IUser[]> {
-    return [
-      {
-        id: 1,
-        name: "John Doe",
-        balance: 100.1,
-      },
-      {
-        id: 2,
-        name: "Jane Doe",
-        balance: 200.2,
-      },
-    ];
+    const users = await this.userModel.findAll();
+    return users.map((user) => user.dataValues);
   }
 }

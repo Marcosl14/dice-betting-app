@@ -2,6 +2,7 @@ import { Inject, Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
 import { IBetsRepository } from "../../../domain/repositories/IBetsRepository";
 import { BetsRepository } from "../../../infrastructure/adapters/repositories/BetsRepository";
+import { NotFoundError } from "../../erros/NotFoundError";
 
 @Service()
 export class GetBetUseCase {
@@ -11,6 +12,12 @@ export class GetBetUseCase {
   ) {}
 
   public async execute(id: number): Promise<IBet> {
-    return this.betsRepository.find(id);
+    const bet = await this.betsRepository.find(id);
+
+    if (!bet) {
+      throw new NotFoundError(`Bet id ${id} not found`);
+    }
+
+    return bet;
   }
 }

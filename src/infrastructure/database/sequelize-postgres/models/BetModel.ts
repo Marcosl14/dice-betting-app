@@ -7,6 +7,7 @@ import {
   PrimaryKey,
   Table,
   Model,
+  AllowNull,
 } from "sequelize-typescript";
 import { IBet } from "../../../../domain/entities/IBet";
 import { Optional } from "sequelize";
@@ -30,27 +31,31 @@ export class BetModel
   declare id: number;
 
   @ForeignKey(() => UserModel)
+  @AllowNull(false)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
   })
   declare userId: number;
 
+  @AllowNull(false)
   @Column({
     type: DataType.DECIMAL,
   })
   declare betAmount: number;
 
+  @AllowNull(false)
   @Column({
     type: DataType.FLOAT,
   })
   declare chance: number;
 
+  @AllowNull(false)
   @Column({
     type: DataType.DECIMAL,
   })
   declare payout: number;
 
+  @AllowNull(false)
   @Column({
     type: DataType.BOOLEAN,
   })
