@@ -5,6 +5,7 @@ services:
     ports:
       - 3000:3000
     environment:
+      - NODE_ENV=${NODE_ENV}
       - DB_HOST=${POSTGRES_DB_HOST}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}

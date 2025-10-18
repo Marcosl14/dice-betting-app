@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize-typescript";
+import { Sequelize, SequelizeOptions } from "sequelize-typescript";
 import { IDatabaseConnection } from "../../../domain/database/IDatabaseConnection";
 import { UserModel } from "./models/UserModel";
 import { BetModel } from "./models/BetModel";
@@ -13,14 +13,22 @@ export class DbClient implements IDatabaseConnection {
   private readonly instance: Sequelize;
 
   constructor() {
-    this.instance = new Sequelize({
+    const options: SequelizeOptions = {
       database: this.database,
       username: this.username,
       password: this.password,
       host: this.host,
       dialect: "postgres",
       models: [UserModel, BetModel],
-    });
+    };
+
+    if (process.env.NODE_ENV === "development") {
+      options.logging = true;
+    } else {
+      options.logging = false;
+    }
+
+    this.instance = new Sequelize(options);
   }
 
   public async connect() {
@@ -28,12 +36,31 @@ export class DbClient implements IDatabaseConnection {
       await this.instance.authenticate();
       console.log("Connection has been established successfully.");
 
+      // Only for development purpose
+      if (process.env.NODE_ENV === "development") {
+        await this.syncTablesAndCreateUser();
+      }
+
       Container.set("userModel", UserModel);
       Container.set("betModel", BetModel);
     } catch (error) {
       console.error("Unable to connect to the database:", error);
       throw error;
     }
+  }
+
+  private async syncTablesAndCreateUser(): Promise<void> {
+    await this.instance.sync({ force: true, alter: true });
+
+    const username = "John Doe";
+
+    await UserModel.findOrCreate({
+      where: { name: username },
+      defaults: {
+        name: username,
+        balance: 1000,
+      },
+    });
   }
 
   public async disconnect() {
