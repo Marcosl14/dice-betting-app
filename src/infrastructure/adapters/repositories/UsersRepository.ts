@@ -12,8 +12,17 @@ export class UsersRepository implements IUsersRepository {
     return user?.dataValues;
   }
 
-  async findAll(): Promise<IUser[]> {
-    const users = await this.userModel.findAll();
+  async findAll(userIds?: number[]): Promise<IUser[]> {
+    let users: UserModel[];
+    if (userIds) {
+      users = await this.userModel.findAll({
+        where: {
+          id: userIds,
+        },
+      });
+    } else {
+      users = await this.userModel.findAll();
+    }
     return users.map((user) => user.dataValues);
   }
 }

@@ -10,7 +10,7 @@ export class GetUserListUseCase {
     private readonly usersRepository: IUsersRepository
   ) {}
 
-  public async execute(): Promise<IUser[]> {
-    return await this.usersRepository.findAll();
+  public async execute(userIds?: number[]): Promise<IUser[]> {
+    return await this.usersRepository.findAll(userIds);
   }
 }
