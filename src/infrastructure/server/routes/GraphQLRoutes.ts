@@ -11,6 +11,7 @@ import { GetBetResolver } from "../../resolvers/bets/GetBetResolver";
 import { GetUserListResolver } from "../../resolvers/users/GetUserListResolver";
 import { GetUserResolver } from "../../resolvers/users/GetUserResolver";
 import { GetBetUserResolver } from "../../resolvers/bets/GetBetUserResolver";
+import { GetUserBetsResolver } from "../../resolvers/users/GetUserBetsResolver";
 
 export class GraphQLRoutes {
   private mainpath = "/graphql";
@@ -21,6 +22,7 @@ export class GraphQLRoutes {
       resolvers: [
         GetUserResolver,
         GetUserListResolver,
+        GetUserBetsResolver,
 
         GetBetResolver,
         GetBetUserResolver,

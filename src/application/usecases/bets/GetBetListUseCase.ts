@@ -10,7 +10,9 @@ export class GetBetListUseCase {
     private readonly betsRepository: IBetsRepository
   ) {}
 
-  public async execute(): Promise<IBet[]> {
-    return await this.betsRepository.findAll();
+  public async execute(userIds?: number[]): Promise<IBet[]> {
+    const bets = await this.betsRepository.findAll(userIds);
+
+    return bets;
   }
 }

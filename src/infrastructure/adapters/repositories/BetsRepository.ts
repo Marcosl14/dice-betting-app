@@ -21,8 +21,19 @@ export class BetsRepository implements IBetsRepository {
     return bet?.dataValues;
   }
 
-  async findAll(): Promise<IBet[]> {
-    const bets = await this.betModel.findAll();
+  async findAll(userIds?: number[]): Promise<IBet[]> {
+    let bets: BetModel[];
+
+    if (userIds) {
+      bets = await this.betModel.findAll({
+        where: {
+          userId: userIds,
+        },
+      });
+    } else {
+      bets = await this.betModel.findAll();
+    }
+
     return bets.map((bet) => bet.dataValues);
   }
 

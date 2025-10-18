@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID, Float } from "type-graphql";
 import { IUser } from "../../domain/entities/IUser";
+import { Bet } from "./Bet";
 
 @ObjectType({ description: "Represents a betting user." })
 export class User implements IUser {
@@ -11,4 +12,7 @@ export class User implements IUser {
 
   @Field(() => Float, { description: "Balance of the user" })
   balance!: number;
+
+  @Field(() => [Bet])
+  bets!: Bet[];
 }
