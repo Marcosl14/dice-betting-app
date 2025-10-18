@@ -1,9 +1,11 @@
 import { Inject, Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
-import { IBetsRepository } from "../../../domain/repositories/IBetsRepository";
+import {
+  CreateBetI,
+  IBetsRepository,
+} from "../../../domain/repositories/IBetsRepository";
 import { BetModel } from "../../database/sequelize-postgres/models/BetModel";
 import { UserModel } from "../../database/sequelize-postgres/models/UserModel";
-import { CreateBetDTO } from "../../../application/dtos/CreateBetDTO";
 import { QueryTypes } from "sequelize";
 import { BadRequestError } from "../../../application/erros/BadRequestError";
 
@@ -41,7 +43,7 @@ export class BetsRepository implements IBetsRepository {
     return bestBets;
   }
 
-  async create(data: CreateBetDTO): Promise<IBet> {
+  async create(data: CreateBetI): Promise<IBet> {
     const result = await this.betModel.sequelize!.transaction(async (t) => {
       const user = await this.userModel.findByPk(data.userId, {
         transaction: t,

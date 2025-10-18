@@ -15,13 +15,11 @@ export class CreateBetResolver {
   async createBet(
     @Arg("userId", () => Int) userId: number,
     @Arg("betAmount", () => Float) betAmount: number,
-    @Arg("chance", () => Float) chance: number,
-    @Arg("payout", () => Float) payout: number,
-    @Arg("win", () => Boolean) win: boolean
+    @Arg("chance", () => Float) chance: number
   ): Promise<IBet> {
     try {
       return await this.createBetUseCase.execute(
-        new CreateBetDTO(userId, betAmount, chance, payout, win)
+        new CreateBetDTO(userId, betAmount, chance)
       );
     } catch (error) {
       GraphQlErrorHandling.handle(error as Error);

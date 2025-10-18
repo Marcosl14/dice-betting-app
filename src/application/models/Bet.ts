@@ -6,6 +6,7 @@ export class Bet implements IBet {
   @Field(() => ID)
   id!: number;
 
+  @Field(() => ID)
   userId!: number;
 
   @Field(() => Float)
