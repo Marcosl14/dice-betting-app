@@ -7,32 +7,47 @@ import {
 import { BetsRepository } from "../../../infrastructure/adapters/repositories/BetsRepository";
 import { CreateBetDTO } from "../../dtos/CreateBetDTO";
 import { BadRequestError } from "../../erros/BadRequestError";
+import { RedlockService } from "../../../infrastructure/database/redlock-redis/RedlockService";
+import { ILock, ILockService } from "../../../domain/database/ILockService";
 
 @Service()
 export class CreateBetUseCase {
   constructor(
     @Inject(() => BetsRepository)
-    private readonly betsRepository: IBetsRepository
+    private readonly betsRepository: IBetsRepository,
+    @Inject(() => RedlockService)
+    private readonly lockingService: ILockService
   ) {}
 
   public async execute(input: CreateBetDTO): Promise<IBet> {
-    const { userId, betAmount, chance } = input;
+    const lockingKey = `user:create-bet:${input.userId}`;
+    let lock: ILock | null = null;
 
-    if (chance <= 0 || chance >= 1) {
-      throw new BadRequestError("Chance must be between 0 and 1");
+    try {
+      lock = await this.lockingService.lock(lockingKey, 1000);
+
+      const { userId, betAmount, chance } = input;
+
+      if (chance <= 0 || chance >= 1) {
+        throw new BadRequestError("Chance must be between 0 and 1");
+      }
+
+      const win = Math.random() < chance;
+      const payout = win ? betAmount / chance : 0;
+
+      const betToCreate: CreateBetI = {
+        userId,
+        betAmount,
+        chance,
+        payout,
+        win,
+      };
+
+      return await this.betsRepository.create(betToCreate);
+    } finally {
+      if (lock) {
+        await this.lockingService.unlock(lock);
+      }
     }
-
-    const win = Math.random() < chance;
-    const payout = win ? betAmount / chance : 0;
-
-    const betToCreate: CreateBetI = {
-      userId,
-      betAmount,
-      chance,
-      payout,
-      win,
-    };
-
-    return await this.betsRepository.create(betToCreate);
   }
 }

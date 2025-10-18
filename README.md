@@ -18,6 +18,9 @@ Follow these steps to build and run the application.
    Create a file named `.env` in the project's root directory. You can copy the content below and modify the values to your preference.
 
    ```
+   # Environment / Scope
+   NODE_ENV=development
+
    # PostgreSQL Variables
    POSTGRES_DB_HOST=postgres
    POSTGRES_USER=myuser
