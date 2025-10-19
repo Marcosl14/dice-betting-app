@@ -3,6 +3,7 @@ import { GetUserResolver } from "../../../../src/infrastructure/resolvers/users/
 import { IUser } from "../../../../src/domain/entities/IUser";
 import { GetUserUseCase } from "../../../../src/application/usecases/users/GetUserUseCase";
 import { NotFoundError } from "../../../../src/application/erros/NotFoundError";
+import { GraphQLError } from "graphql";
 
 describe("GetUserResolver", () => {
   const mockGetUserUseCase = mock<GetUserUseCase>();
@@ -41,7 +42,8 @@ describe("GetUserResolver", () => {
       err = error as Error;
     } finally {
       expect(err).toBeDefined();
-      expect(err?.message).toEqual("User not found");
+      expect(err).toBeInstanceOf(GraphQLError);
+      expect(err?.message).toEqual(notFoundError.message);
       expect(mockGetUserUseCase.execute).toHaveBeenCalledWith(userId);
       expect(mockGetUserUseCase.execute).toHaveBeenCalledTimes(1);
     }

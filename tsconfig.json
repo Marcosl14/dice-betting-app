@@ -23,6 +23,9 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/infrastructure/resolvers/bets/GetBetUserResolver.test.ts"
+  ],
   "exclude": ["node_modules", "dist", "tests"]
 }
