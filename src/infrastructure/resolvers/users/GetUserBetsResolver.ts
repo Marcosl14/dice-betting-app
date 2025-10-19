@@ -17,8 +17,7 @@ export class GetUserBetsResolver {
     try {
       return await this.betDataLoader.load(user.id);
     } catch (error) {
-      GraphQlErrorHandling.handle(error as Error);
-      throw error;
+      throw GraphQlErrorHandling.handle(error as Error);
     }
   }
 }

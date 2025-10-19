@@ -22,8 +22,7 @@ export class CreateBetResolver {
         new CreateBetDTO(userId, betAmount, chance)
       );
     } catch (error) {
-      GraphQlErrorHandling.handle(error as Error);
-      throw error;
+      throw GraphQlErrorHandling.handle(error as Error);
     }
   }
 }

@@ -17,8 +17,7 @@ export class GetBetResolver {
     try {
       return await this.getBetUseCase.execute(id);
     } catch (error) {
-      GraphQlErrorHandling.handle(error as Error);
-      throw error;
+      throw GraphQlErrorHandling.handle(error as Error);
     }
   }
 }

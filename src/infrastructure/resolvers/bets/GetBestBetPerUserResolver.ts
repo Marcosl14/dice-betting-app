@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { Bet } from "../../../application/models/Bet";
 import { IBet } from "../../../domain/entities/IBet";
 import { GetBestBetPerUserUseCase } from "../../../application/usecases/bets/GetBestBetPerUserUseCase";
+import { GraphQlErrorHandling } from "../errors/GraphQlErrorHandling";
 
 @Service()
 @Resolver(() => Bet)
@@ -15,6 +16,10 @@ export class GetBestBetPerUserResolver {
   async getBestBetPerUser(
     @Arg("limit", () => Int, { nullable: false }) limit: number
   ): Promise<IBet[]> {
-    return await this.getBestBetPerUserUseCase.execute(limit);
+    try {
+      return await this.getBestBetPerUserUseCase.execute(limit);
+    } catch (error) {
+      throw GraphQlErrorHandling.handle(error as Error);
+    }
   }
 }

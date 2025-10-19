@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { User } from "../../../application/models/User";
 import { IUser } from "../../../domain/entities/IUser";
 import { GetUserListUseCase } from "../../../application/usecases/users/GetUserListUseCase";
+import { GraphQlErrorHandling } from "../errors/GraphQlErrorHandling";
 
 @Service()
 @Resolver(() => User)
@@ -11,6 +12,10 @@ export class GetUserListResolver {
 
   @Query(() => [User])
   async getUserList(): Promise<IUser[]> {
-    return await this.getUserListUseCase.execute();
+    try {
+      return await this.getUserListUseCase.execute();
+    } catch (error) {
+      throw GraphQlErrorHandling.handle(error as Error);
+    }
   }
 }
