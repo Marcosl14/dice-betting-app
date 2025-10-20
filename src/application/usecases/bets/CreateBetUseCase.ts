@@ -32,7 +32,7 @@ export class CreateBetUseCase {
         throw new BadRequestError("Chance must be between 0 and 1");
       }
 
-      const win = Math.random() < chance;
+      const win = this.generateRandomNumber() < chance;
       const payout = win ? betAmount / chance : 0;
 
       const betToCreate: CreateBetI = {
@@ -49,5 +49,9 @@ export class CreateBetUseCase {
         await this.lockingService.unlock(lock);
       }
     }
+  }
+
+  private generateRandomNumber(): number {
+    return Math.random();
   }
 }

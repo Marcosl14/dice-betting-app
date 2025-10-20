@@ -11,8 +11,6 @@ export class GetBetListUseCase {
   ) {}
 
   public async execute(userIds?: number[]): Promise<IBet[]> {
-    const bets = await this.betsRepository.findAll(userIds);
-
-    return bets;
+    return await this.betsRepository.findAll(userIds);
   }
 }
