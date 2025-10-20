@@ -9,7 +9,9 @@ export class BetDataLoader {
 
   public async load(userId: number): Promise<IBet[]> {
     const loader = new DataLoader<number, IBet[]>(async (userIds) => {
-      const allBets = await this.getBetListUseCase.execute([...userIds]);
+      const allBets = await this.getBetListUseCase.execute({
+        userIds: [...userIds],
+      });
 
       const betsByUserId = userIds.map((userId) =>
         allBets.filter((bet) => bet.userId === userId)

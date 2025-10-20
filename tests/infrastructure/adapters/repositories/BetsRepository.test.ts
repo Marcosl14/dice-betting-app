@@ -54,7 +54,7 @@ describe("BetsRepository", () => {
       bets.map((b) => ({ dataValues: b }))
     );
 
-    const result = await repo.findAll([1]);
+    const result = await repo.findAll({ userIds: [1] });
 
     expect(result).toEqual(bets);
     expect(mockBetModel.findAll).toHaveBeenCalled();

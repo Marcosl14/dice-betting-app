@@ -1,6 +1,9 @@
 import { Inject, Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
-import { IBetsRepository } from "../../../domain/repositories/IBetsRepository";
+import {
+  IBetsRepository,
+  IGetBetList,
+} from "../../../domain/repositories/IBetsRepository";
 import { BetsRepository } from "../../../infrastructure/adapters/repositories/BetsRepository";
 
 @Service()
@@ -10,7 +13,7 @@ export class GetBetListUseCase {
     private readonly betsRepository: IBetsRepository
   ) {}
 
-  public async execute(userIds?: number[]): Promise<IBet[]> {
-    return await this.betsRepository.findAll(userIds);
+  public async execute(params?: IGetBetList): Promise<IBet[]> {
+    return await this.betsRepository.findAll(params);
   }
 }

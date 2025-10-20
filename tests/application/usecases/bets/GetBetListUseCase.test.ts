@@ -27,10 +27,10 @@ describe("GetBetListUseCase", () => {
 
     mockBetsRepository.findAll.mockResolvedValue(bets);
 
-    const result = await getBetListUseCase.execute(userIds);
+    const result = await getBetListUseCase.execute({ userIds });
 
     expect(result).toEqual(bets);
-    expect(mockBetsRepository.findAll).toHaveBeenCalledWith(userIds);
+    expect(mockBetsRepository.findAll).toHaveBeenCalledWith({ userIds });
   });
 
   it("should handle repository errors using try/catch/finally", async () => {
@@ -40,13 +40,13 @@ describe("GetBetListUseCase", () => {
 
     let err: Error | undefined = undefined;
     try {
-      await getBetListUseCase.execute(userIds);
+      await getBetListUseCase.execute({ userIds });
     } catch (error) {
       err = error as Error;
     } finally {
       expect(err).toBeDefined();
       expect(err).toBe(error);
-      expect(mockBetsRepository.findAll).toHaveBeenCalledWith(userIds);
+      expect(mockBetsRepository.findAll).toHaveBeenCalledWith({ userIds });
     }
   });
 });

@@ -3,10 +3,11 @@ import { IBet } from "../../../domain/entities/IBet";
 import {
   CreateBetI,
   IBetsRepository,
+  IGetBetList,
 } from "../../../domain/repositories/IBetsRepository";
 import { BetModel } from "../../database/sequelize-postgres/models/BetModel";
 import { UserModel } from "../../database/sequelize-postgres/models/UserModel";
-import { QueryTypes } from "sequelize";
+import { FindOptions, QueryTypes } from "sequelize";
 import { BadRequestError } from "../../../application/erros/BadRequestError";
 
 @Service()
@@ -21,20 +22,32 @@ export class BetsRepository implements IBetsRepository {
     return bet?.dataValues;
   }
 
-  async findAll(userIds?: number[]): Promise<IBet[]> {
-    let bets: BetModel[];
-
-    if (userIds) {
-      bets = await this.betModel.findAll({
-        where: {
-          userId: userIds,
-        },
-      });
-    } else {
-      bets = await this.betModel.findAll();
-    }
+  async findAll(params?: IGetBetList): Promise<IBet[]> {
+    const bets: BetModel[] = await this.betModel.findAll(
+      params ? this.getFindAllParams(params) : {}
+    );
 
     return bets.map((bet) => bet.dataValues);
+  }
+
+  private getFindAllParams({ userIds, limit, page }: IGetBetList) {
+    const params: FindOptions = {};
+
+    if (userIds) {
+      params.where = {
+        userId: userIds,
+      };
+    }
+
+    if (limit) {
+      params.limit = limit;
+    }
+
+    if (page && limit) {
+      params.offset = (page - 1) * limit;
+    }
+
+    return params;
   }
 
   async findBestBetPerUser(limit: number): Promise<IBet[]> {

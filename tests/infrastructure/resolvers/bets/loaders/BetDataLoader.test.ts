@@ -23,7 +23,9 @@ describe("BetDataLoader", () => {
     const result = await loader.load(userId);
 
     expect(result).toEqual(bets);
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith([userId]);
+    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
+      userIds: [userId],
+    });
     expect(mockGetBetListUseCase.execute).toHaveBeenCalledTimes(1);
   });
 
@@ -38,7 +40,9 @@ describe("BetDataLoader", () => {
     const result = await loader.load(userId);
 
     expect(result).toEqual([]);
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith([userId]);
+    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
+      userIds: [userId],
+    });
     expect(mockGetBetListUseCase.execute).toHaveBeenCalledTimes(1);
   });
 
@@ -72,8 +76,12 @@ describe("BetDataLoader", () => {
 
     expect(resultA).toEqual(bets.filter((b) => b.userId === userIdA));
     expect(resultB).toEqual(bets.filter((b) => b.userId === userIdB));
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith([userIdA]);
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith([userIdB]);
+    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
+      userIds: [userIdA],
+    });
+    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
+      userIds: [userIdB],
+    });
     expect(mockGetBetListUseCase.execute).toHaveBeenCalledTimes(2);
   });
 });

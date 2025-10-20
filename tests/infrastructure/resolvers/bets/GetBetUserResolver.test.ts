@@ -21,7 +21,6 @@ describe("GetBetUserResolver", () => {
       balance: 1000,
     };
 
-    // Mock the DataLoader's load method
     mockUserDataLoader.load.mockResolvedValue(mockUser);
 
     const result = await getBetUserResolver.user(mockBet);
@@ -36,7 +35,6 @@ describe("GetBetUserResolver", () => {
     const errorMessage = "Failed to fetch user";
     const dataLoaderError = new Error(errorMessage);
 
-    // Mock the DataLoader's load method to reject
     mockUserDataLoader.load.mockRejectedValue(dataLoaderError);
 
     await expect(getBetUserResolver.user(mockBet)).rejects.toThrow(
