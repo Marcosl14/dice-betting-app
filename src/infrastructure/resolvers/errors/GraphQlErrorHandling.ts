@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
 import { NotFoundError } from "../../../application/erros/NotFoundError";
 import { BadRequestError } from "../../../application/erros/BadRequestError";
+import { ValidationError } from "../../../application/erros/ValidationError";
 
 export class GraphQlErrorHandling {
   public static handle(error: Error): GraphQLError {
@@ -16,6 +17,14 @@ export class GraphQlErrorHandling {
       return new GraphQLError(error.message, {
         extensions: {
           code: "NOT_FOUND",
+        },
+      });
+    }
+
+    if (error instanceof ValidationError) {
+      return new GraphQLError(error.message, {
+        extensions: {
+          code: "VALIDATION_ERROR",
         },
       });
     }

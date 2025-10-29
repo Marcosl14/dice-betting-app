@@ -1,4 +1,4 @@
-import { Resolver, Query, Arg, ID } from "type-graphql";
+import { Resolver, Query, Arg, Int } from "type-graphql";
 import { Service } from "typedi";
 import { User } from "../../../application/models/User";
 import { IUser } from "../../../domain/entities/IUser";
@@ -12,7 +12,7 @@ export class GetUserResolver {
 
   @Query(() => User)
   async getUser(
-    @Arg("id", () => ID, { nullable: false }) id: number
+    @Arg("id", () => Int, { nullable: false }) id: number
   ): Promise<IUser> {
     try {
       return await this.getUserUseCase.execute(id);

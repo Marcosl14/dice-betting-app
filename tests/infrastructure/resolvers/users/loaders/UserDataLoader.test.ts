@@ -5,10 +5,11 @@ import { IUser } from "../../../../../src/domain/entities/IUser";
 
 describe("UserDataLoader", () => {
   const mockGetUserListUseCase = mock<GetUserListUseCase>();
-  const loader = new UserDataLoader(mockGetUserListUseCase);
+  let loader: UserDataLoader;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    loader = new UserDataLoader(mockGetUserListUseCase);
   });
 
   it("should return a user for the given id", async () => {
@@ -26,9 +27,7 @@ describe("UserDataLoader", () => {
 
   it("should return undefined when no user is found", async () => {
     const id = 2;
-    mockGetUserListUseCase.execute.mockResolvedValue([
-      undefined as unknown as IUser,
-    ]);
+    mockGetUserListUseCase.execute.mockResolvedValue([]);
 
     const result = await loader.load(id);
 
@@ -37,23 +36,26 @@ describe("UserDataLoader", () => {
     expect(mockGetUserListUseCase.execute).toHaveBeenCalledTimes(1);
   });
 
-  it("should handle multiple sequential loads", async () => {
+  it("should batch load when multiple loads are performed (DataLoader behaviour)", async () => {
     const idA = 1;
     const idB = 2;
-    const usersForA: IUser[] = [{ id: idA, name: "A", balance: 100 }];
-    const usersForB: IUser[] = [{ id: idB, name: "B", balance: 200 }];
+    const users: IUser[] = [
+      { id: idA, name: "A", balance: 100 },
+      { id: idB, name: "B", balance: 200 },
+    ];
 
-    mockGetUserListUseCase.execute
-      .mockResolvedValueOnce(usersForA)
-      .mockResolvedValueOnce(usersForB);
+    mockGetUserListUseCase.execute.mockResolvedValue(users);
 
-    const resA = await loader.load(idA);
-    const resB = await loader.load(idB);
+    const [resA, resB] = await Promise.all([
+      loader.load(idA),
+      loader.load(idB),
+    ]);
 
-    expect(resA).toEqual(usersForA[0]);
-    expect(resB).toEqual(usersForB[0]);
-    expect(mockGetUserListUseCase.execute).toHaveBeenCalledWith([idA]);
-    expect(mockGetUserListUseCase.execute).toHaveBeenCalledWith([idB]);
-    expect(mockGetUserListUseCase.execute).toHaveBeenCalledTimes(2);
+    expect(resA).toEqual(users.find((u) => u.id === idA));
+    expect(resB).toEqual(users.find((u) => u.id === idB));
+
+    // The use case should have been called only once with both IDs
+    expect(mockGetUserListUseCase.execute).toHaveBeenCalledWith([idA, idB]);
+    expect(mockGetUserListUseCase.execute).toHaveBeenCalledTimes(1);
   });
 });

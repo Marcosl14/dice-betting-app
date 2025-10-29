@@ -5,10 +5,11 @@ import { IBet } from "../../../../../src/domain/entities/IBet";
 
 describe("BetDataLoader", () => {
   const mockGetBetListUseCase = mock<GetBetListUseCase>();
-  const loader = new BetDataLoader(mockGetBetListUseCase);
+  let loader: BetDataLoader;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    loader = new BetDataLoader(mockGetBetListUseCase);
   });
 
   it("should return bets for the given userId", async () => {
@@ -71,17 +72,16 @@ describe("BetDataLoader", () => {
 
     mockGetBetListUseCase.execute.mockResolvedValue(bets);
 
-    const resultA = await loader.load(userIdA);
-    const resultB = await loader.load(userIdB);
+    const [resultA, resultB] = await Promise.all([
+      loader.load(userIdA),
+      loader.load(userIdB),
+    ]);
 
     expect(resultA).toEqual(bets.filter((b) => b.userId === userIdA));
     expect(resultB).toEqual(bets.filter((b) => b.userId === userIdB));
     expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
-      userIds: [userIdA],
+      userIds: [userIdA, userIdB],
     });
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledWith({
-      userIds: [userIdB],
-    });
-    expect(mockGetBetListUseCase.execute).toHaveBeenCalledTimes(2);
+    expect(mockGetBetListUseCase.execute).toHaveBeenCalledTimes(1);
   });
 });

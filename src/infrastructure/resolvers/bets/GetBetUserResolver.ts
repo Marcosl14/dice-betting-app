@@ -12,8 +12,8 @@ import { UserDataLoader } from "../users/loaders/UserDataLoader";
 export class GetBetUserResolver {
   constructor(private readonly userDataLoader: UserDataLoader) {}
 
-  @FieldResolver(() => User, { name: "user" })
-  async user(@Root() bet: BetModel): Promise<IUser> {
+  @FieldResolver(() => User, { name: "user", nullable: true })
+  async user(@Root() bet: BetModel): Promise<IUser | undefined> {
     try {
       return await this.userDataLoader.load(bet.userId);
     } catch (error) {
