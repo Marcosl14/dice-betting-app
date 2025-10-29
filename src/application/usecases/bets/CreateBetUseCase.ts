@@ -33,7 +33,7 @@ export class CreateBetUseCase {
       }
 
       const win = this.generateRandomNumber() < chance;
-      const payout = win ? betAmount / chance : 0;
+      const payout = betAmount / chance;
 
       const betToCreate: CreateBetI = {
         userId,
