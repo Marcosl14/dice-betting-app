@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 import { NotFoundError } from "../../../application/erros/NotFoundError";
 import { BadRequestError } from "../../../application/erros/BadRequestError";
-import { ValidationError } from "sequelize";
+import { ValidationError } from "../../../application/erros/ValidationError";
 
 export class GraphQlErrorHandling {
   public static handle(error: Error): GraphQLError {
