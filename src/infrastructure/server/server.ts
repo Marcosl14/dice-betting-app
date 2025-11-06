@@ -4,7 +4,7 @@ import { DbClient } from "../database/sequelize-postgres/dbclient";
 
 export class Server {
   private app: Application;
-  private port: number = 3000;
+  private port: number = parseInt(process.env.PORT!) || 3000;
 
   constructor(private dbclient: DbClient) {
     this.app = express();
@@ -18,7 +18,7 @@ export class Server {
     await this.setupRoutes();
 
     this.app.listen(this.port, () => {
-      console.log("Server listening on port 3000");
+      console.log("Server listening on port: " + this.port);
     });
   }
 
