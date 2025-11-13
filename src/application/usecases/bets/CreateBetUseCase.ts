@@ -1,20 +1,19 @@
 import { Inject, Service } from "typedi";
 import { IBet } from "../../../domain/entities/IBet";
-import {
-  CreateBetI,
-  IBetsRepository,
-} from "../../../domain/repositories/IBetsRepository";
-import { BetsRepository } from "../../../infrastructure/adapters/repositories/BetsRepository";
+import { CreateBetI } from "../../../domain/repositories/IBetsRepository";
 import { CreateBetDTO } from "../../dtos/CreateBetDTO";
 import { BadRequestError } from "../../erros/BadRequestError";
 import { RedlockService } from "../../../infrastructure/database/redlock-redis/RedlockService";
 import { ILock, ILockService } from "../../../domain/database/ILockService";
+import { IUnitOfWork } from "../../../domain/repositories/IUnitOfWork";
+import { UnitOfWork } from "../../../infrastructure/adapters/repositories/UnitOfWork";
+import { Transaction } from "sequelize";
 
 @Service()
 export class CreateBetUseCase {
   constructor(
-    @Inject(() => BetsRepository)
-    private readonly betsRepository: IBetsRepository,
+    @Inject(() => UnitOfWork)
+    private readonly unitOfWork: IUnitOfWork,
     @Inject(() => RedlockService)
     private readonly lockingService: ILockService
   ) {}
@@ -43,7 +42,13 @@ export class CreateBetUseCase {
         win,
       };
 
-      return await this.betsRepository.create(betToCreate);
+      const transaction = await this.unitOfWork.beginTransaction();
+      const bet = await this.createBetTransaction(betToCreate, transaction);
+      await this.unitOfWork.commit();
+      return bet;
+    } catch (error) {
+      await this.unitOfWork.rollback();
+      throw error;
     } finally {
       if (lock) {
         await this.lockingService.unlock(lock);
@@ -53,5 +58,33 @@ export class CreateBetUseCase {
 
   private generateRandomNumber(): number {
     return Math.random();
+  }
+
+  private async createBetTransaction(
+    betToCreate: CreateBetI,
+    transaction: Transaction
+  ): Promise<IBet> {
+    await this.unitOfWork.usersRepository.updateBalance(
+      betToCreate.userId,
+      -betToCreate.betAmount,
+      transaction
+    );
+
+    const bet = await this.unitOfWork.betsRepository.create(
+      {
+        ...betToCreate,
+      },
+      transaction
+    );
+
+    if (betToCreate.win) {
+      await this.unitOfWork.usersRepository.updateBalance(
+        betToCreate.userId,
+        betToCreate.payout,
+        transaction
+      );
+    }
+
+    return bet;
   }
 }

@@ -43,6 +43,7 @@ export class DbClient implements IDatabaseConnection {
 
       Container.set("userModel", UserModel);
       Container.set("betModel", BetModel);
+      Container.set(Sequelize, this.instance);
     } catch (error) {
       console.error("Unable to connect to the database:", error);
       throw error;

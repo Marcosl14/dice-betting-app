@@ -6,25 +6,25 @@ import {
   IGetBetList,
 } from "../../../domain/repositories/IBetsRepository";
 import { BetModel } from "../../database/sequelize-postgres/models/BetModel";
-import { UserModel } from "../../database/sequelize-postgres/models/UserModel";
-import { FindOptions, QueryTypes } from "sequelize";
-import { BadRequestError } from "../../../application/erros/BadRequestError";
+import { FindOptions, QueryTypes, Transaction } from "sequelize";
 
 @Service()
 export class BetsRepository implements IBetsRepository {
-  constructor(
-    @Inject("betModel") private betModel: typeof BetModel,
-    @Inject("userModel") private userModel: typeof UserModel
-  ) {}
+  constructor(@Inject("betModel") private betModel: typeof BetModel) {}
 
-  async find(id: number): Promise<IBet | undefined> {
-    const bet = await this.betModel.findByPk(id);
+  async find(id: number, transaction?: Transaction): Promise<IBet | undefined> {
+    const bet = await this.betModel.findByPk(id, { transaction });
     return bet?.dataValues;
   }
 
-  async findAll(params?: IGetBetList): Promise<IBet[]> {
+  async findAll(
+    params?: IGetBetList,
+    transaction?: Transaction
+  ): Promise<IBet[]> {
     const bets: BetModel[] = await this.betModel.findAll(
-      params ? this.getFindAllParams(params) : {}
+      params
+        ? { ...this.getFindAllParams(params), transaction }
+        : { transaction }
     );
 
     return bets.map((bet) => bet.dataValues);
@@ -50,7 +50,10 @@ export class BetsRepository implements IBetsRepository {
     return params;
   }
 
-  async findBestBetPerUser(limit: number): Promise<IBet[]> {
+  async findBestBetPerUser(
+    limit: number,
+    transaction?: Transaction
+  ): Promise<IBet[]> {
     const query = `
       SELECT DISTINCT ON ("userId") *
       FROM bets
@@ -62,46 +65,13 @@ export class BetsRepository implements IBetsRepository {
     const bestBets = await this.betModel.sequelize!.query<IBet>(query, {
       replacements: { limit },
       type: QueryTypes.SELECT,
+      transaction,
     });
 
     return bestBets;
   }
 
-  async create(data: CreateBetI): Promise<IBet> {
-    const result = await this.betModel.sequelize!.transaction(async (t) => {
-      const user = await this.userModel.findByPk(data.userId, {
-        transaction: t,
-        lock: true,
-      });
-
-      if (!user) {
-        throw new BadRequestError(
-          `User with id ${data.userId} does not exist.`
-        );
-      }
-
-      if (user.balance < data.betAmount) {
-        throw new BadRequestError("Insufficient balance.");
-      }
-
-      const bet = await this.betModel.create(
-        {
-          ...data,
-        },
-        { transaction: t }
-      );
-
-      user.balance -= data.betAmount;
-
-      if (data.win) {
-        user.balance += data.payout;
-      }
-
-      await user.save({ transaction: t });
-
-      return bet;
-    });
-
-    return result.dataValues;
+  async create(data: CreateBetI, transaction?: Transaction): Promise<IBet> {
+    return this.betModel.create(data, { transaction });
   }
 }
